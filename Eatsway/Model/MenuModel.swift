@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-class MenuModel: Identifiable {
+final class MenuModel: Identifiable {
     var id: UUID = UUID()
     var name: String
     var image: String

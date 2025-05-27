@@ -1,9 +1,12 @@
 import SwiftUI
 import Foundation
+import SwiftData
+
+
 struct RecommendationView: View {
+    @Environment(\.modelContext) private var context// : ModelContext
     @EnvironmentObject var filterVM: FilterViewModel
     @State private var isShowingFilterPage = false // Kontrol untuk menampilkan FilterView modal
-
 
     var body: some View {
         NavigationStack {
@@ -11,16 +14,12 @@ struct RecommendationView: View {
                 header
                 tenantList
                 topRatings
-//                filterButton
                 Spacer()
             }
             .onAppear {
                 if filterVM.filteredTenants.isEmpty {
                     filterVM.applyFilters()
-                    
                 }
-
-
             }
             .sheet(isPresented: $isShowingFilterPage) {
                 filterViewModal
@@ -42,7 +41,6 @@ struct RecommendationView: View {
                     .font(.title2)
                     .foregroundColor(.blue)
             }
-//            Spacer()
         }
         .padding(.top, 16)
         .padding(.leading, 16)
@@ -51,24 +49,23 @@ struct RecommendationView: View {
 
     // Tenant List View
     var tenantList: some View {
-            VStack(alignment: .leading) {
-                Text("Recommendations")
-                    .font(.title2)
-                    .bold()
-                    .padding(.top, 6)
-                    .padding(.leading, 10)
+        VStack(alignment: .leading) {
+            Text("Recommendations")
+                .font(.title2)
+                .bold()
+                .padding(.top, 6)
+                .padding(.leading, 10)
 
-                ScrollView(.horizontal) {
-                    HStack {
-                        ForEach(filterVM.filteredTenants) { tenant in
-                            tenantCard(for: tenant)
-                                .transition(.scale) // Optional animasi sederhana
-
-                        }
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(filterVM.filteredTenants) { tenant in // Menggunakan yang sudah diurutkan
+                        tenantCard(for: tenant)
+                            .transition(.scale) // Optional animasi sederhana
                     }
                 }
-                .padding(.top, 10)
             }
+            .padding(.top, 10)
+        }
 
     }
 
@@ -98,7 +95,7 @@ struct RecommendationView: View {
                     .padding(.leading, 10)
                 Spacer()
             }
-            
+
             if filterVM.topFiltered.isEmpty {
                 Text("No top ratings found")
                     .foregroundColor(.gray)
@@ -117,8 +114,6 @@ struct RecommendationView: View {
             }
         }
     }
-
-
 
     // Filter Button View
     var filterButton: some View {
@@ -146,12 +141,16 @@ struct RecommendationView: View {
 
 struct RecommendationView_Previews: PreviewProvider {
     static var previews: some View {
-        // Initialize the FilterViewModel to inject into the view
-        let filterVM = FilterViewModel()
-        // Set up a preview with the environment object
+        // Initialize the FilterViewModel untuk inject ke view
+        let context = DataController.previewContainer.mainContext
+
+        let filterVM = FilterViewModel(repository: TenantRepository(context: context))
+        // Set up preview dengan environment object
         RecommendationView()
+            .modelContainer(DataController.previewContainer)
             .environmentObject(filterVM)
             .previewLayout(.sizeThatFits) // Optional: Customize the preview size
-//            .padding() // Optional: Add padding for better visualization
+//            .padding() // Optional: Add padding untuk visualisasi lebih baik
     }
 }
+

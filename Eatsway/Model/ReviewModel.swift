@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-class ReviewModel: Identifiable{
+final class ReviewModel: Identifiable{
     var reviewID: UUID = UUID()
     var reviewName: String
     var reviewType: [String]

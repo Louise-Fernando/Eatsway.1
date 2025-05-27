@@ -5,7 +5,7 @@ import Foundation
 struct FilterView: View {
     @EnvironmentObject var filterVM: FilterViewModel
     @Binding var isShowingFilterPage : Bool// Kontrol untuk menampilkan FilterView modal
-
+    
     var body: some View {
         VStack(alignment: .leading) {
             HStack{
@@ -90,9 +90,23 @@ struct FilterView: View {
 
 struct FilterView_Previews: PreviewProvider {
     static var previews: some View {
-        let viewModel = FilterViewModel()
-        
-        FilterView(isShowingFilterPage: .constant(true)) // <- pakai .constant
-            .environmentObject(viewModel)
+        // Initialize the FilterViewModel untuk inject ke view
+        let context = DataController.previewContainer.mainContext
+        let filterVM = FilterViewModel(repository: TenantRepository(context: context))
+        // Set up preview dengan environment object
+        FilterView(isShowingFilterPage: .constant(true))
+            .modelContainer(DataController.previewContainer)
+            .environmentObject(filterVM)
+            .previewLayout(.sizeThatFits) // Optional: Customize the preview size
+        //            .padding() // Optional: Add padding untuk visualisasi lebih baik
     }
 }
+
+//struct FilterView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let viewModel = FilterViewModel()
+//
+//        FilterView(isShowingFilterPage: .constant(true)) // <- pakai .constant
+//            .environmentObject(viewModel)
+//    }
+//}

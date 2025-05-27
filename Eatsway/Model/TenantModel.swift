@@ -37,7 +37,7 @@ enum CuisineCategory: String, CaseIterable, Codable {
 }
 
 @Model
-class TenantModel: Identifiable, Hashable{
+final class TenantModel: Identifiable, Hashable{
     var tenantID: UUID = UUID()
     var image: String
     var name: String
@@ -46,7 +46,9 @@ class TenantModel: Identifiable, Hashable{
     var tenantDescription: String
     var labels: Set<CuisineCategory>
     var rating: Double
+    @Relationship(deleteRule: .cascade)
     var menus: [MenuModel]
+    @Relationship(deleteRule: .cascade)
     var reviews: [ReviewModel]
     
 

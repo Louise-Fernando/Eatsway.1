@@ -5,31 +5,49 @@
 //  Created by Louise Fernando on 09/05/25.
 //
 
+// EatswayApp.swift
 import SwiftUI
 import SwiftData
 
 @main
 struct EatswayApp: App {
-//    var sharedModelContainer: ModelContainer = {
-//        let schema = Schema([
-//            Item.self,
-//        ])
-//        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-//
-//        do {
-//            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-//        } catch {
-//            fatalError("Could not create ModelContainer: \(error)")
-//        }
-//    }()
+    let sharedModelContainer: ModelContainer
+    let repository: TenantRepository
+    let filterVM: FilterViewModel
     
-    @StateObject var filterVM = FilterViewModel()
+    init() {
+        do {
+            let schema = Schema([TenantModel.self])
+            let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+            let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+            self.sharedModelContainer = container
+
+            let context = container.mainContext
+            self.repository = TenantRepository(context: context)
+            self.filterVM = FilterViewModel(repository: self.repository)
+
+        } catch {
+            fatalError("Could not initialize ModelContainer: \(error)")
+        }
+    }
+
 
     var body: some Scene {
         WindowGroup {
             RecommendationView()
-        }.environmentObject(filterVM)
-      
-//        .modelContainer(sharedModelContainer)
+                .onAppear {
+                    Task {
+                        await seedInitialDataIfNeeded(context: sharedModelContainer.mainContext)
+                    }
+                }
+        }
+        .modelContainer(sharedModelContainer)
+        .environmentObject(filterVM)
+    }
+
+    func seedInitialDataIfNeeded(context: ModelContext) async {
+        let repository = TenantRepository(context: context)
+        let dataSeeder = DataSeeder(tenantRepository: repository)
+        await dataSeeder.seedInitialDataIfNeeded()
     }
 }

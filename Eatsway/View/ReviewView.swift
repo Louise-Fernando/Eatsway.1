@@ -103,64 +103,21 @@ struct ReviewView: View {
 
 
 #Preview {
-    // Buat view model di luar closure agar tidak menggunakan @StateObject di tempat yang tidak diperbolehkan
-    let vm = FilterViewModel()
+    let context = DataController.previewContainer.mainContext
+    let repository = TenantRepository(context: context)
     
-    let tenant = TenantModel(
-        image: "Mama Djempol",
-        name: "Mama Djempol",
-        maxPrice: 14,
-        minPrice: 4,
-        tenantDescription: "Mama Djempol adalah warung makan yang menyediakan berbagai jenis masakan rumahan dengan harga yang terjangkau.",
-        labels: [.noodles, .chicken, .vegetables],
-        rating: 4.5,
-        menus: [],
-        reviews: [
-            ReviewModel(
-                reviewName: "Andi Santoso",
-                reviewType: ["food"],
-                reviewImage: nil,
-                reviewDate: Date(),
-                reviewComment: "Makanannya enak banget! Porsinya pas dan harganya terjangkau.",
-                reviewRating: 4.0
-            ),
-            ReviewModel(
-                reviewName: "Budi Hartono",
-                reviewType: ["service"],
-                reviewImage: nil,
-                reviewDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!,
-                reviewComment: "Lumayan enak tapi nunggu makanannya agak lama.",
-                reviewRating: 3.0
-            ),
-            ReviewModel(
-                reviewName: "Citra Lestari",
-                reviewType: ["food"],
-                reviewImage: nil,
-                reviewDate: Calendar.current.date(byAdding: .day, value: -10, to: Date())!,
-                reviewComment: "Rasa makanan otentik banget, cocok buat yang suka masakan rumahan.",
-                reviewRating: 5.0
-            ),
-            ReviewModel(
-                reviewName: "Citra Lestari",
-                reviewType: ["food"],
-                reviewImage: nil,
-                reviewDate: Calendar.current.date(byAdding: .day, value: -10, to: Date())!,
-                reviewComment: "Rasa makanan otentik banget, cocok buat yang suka masakan rumahan.",
-                reviewRating: 5.0
-            ),
-            ReviewModel(
-                reviewName: "Citra Lestari",
-                reviewType: ["food"],
-                reviewImage: nil,
-                reviewDate: Calendar.current.date(byAdding: .day, value: -10, to: Date())!,
-                reviewComment: "Rasa makanan otentik banget, cocok buat yang suka masakan rumahan.",
-                reviewRating: 5.0
-            )
-        ]
-    )
-
+    // Ambil tenant pertama (dummy data sudah ada)
+    let tenant: TenantModel
+    do {
+        let tenants = try repository.getAllTenants()
+        tenant = tenants.first! // force unwrap aman kalau dummy pasti ada
+    } catch {
+        fatalError("Failed to fetch tenant for preview: \(error)")
+    }
+    
+    let vm = FilterViewModel(repository: repository)
+    
     return ReviewView(tenant: tenant)
         .environmentObject(vm)
 }
-
 
